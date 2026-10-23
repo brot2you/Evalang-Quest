@@ -29,54 +29,56 @@ function v7Speak(text,{rate=1,persona=''}={}){
 }
 function setupV7Audio(q){
  v7Stop();
- const play=document.getElementById('playAudio'),pause=document.getElementById('pauseAudio'),restart=document.getElementById('restartAudio'),speed=document.getElementById('audioSpeed'),persona=document.getElementById('audioPersona'),status=document.getElementById('audioStatus');
+ const play=document.getElementById('playAudio'),pause=document.getElementById('pauseAudio'),
+ restart=document.getElementById('restartAudio'),speed=document.getElementById('audioSpeed'),
+ persona=document.getElementById('audioPersona'),status=document.getElementById('audioStatus');
  const say=t=>{if(status?.isConnected)status.textContent=t;};
  const index=typeof bank!=='undefined'?bank.indexOf(q):-1;
- const prerecorded='assets/audio/q'+index+'.mp3';
- let hasRecording=false,isPaused=false,token=0;
+ // Use absolute repo-root URL to avoid relative path resolution.
+ const prerecorded='/Evalang-Quest/assets/audio/q'+index+'.mp3';
+ let isPaused=false,loadedMP3=false;
  const listVoices=()=>{
   const previous=persona.value,voices=v7Voices();
   persona.replaceChildren();
-  if(!voices.length){persona.add(new Option('Voix anglaise par défaut (navigateur)',''));persona.disabled=true;return;}
+  if(!voices.length){persona.add(new Option('Voix par défaut du navigateur',''));persona.disabled=true;return;}
   persona.disabled=false;
-  for(const v of voices)persona.add(new Option(v.name+' · '+v.lang+(v.localService?' · locale':''),v.voiceURI));
+  for(const v of voices)persona.add(new Option(v.name+' · '+v.lang,v.voiceURI));
   if(voices.some(v=>v.voiceURI===previous))persona.value=previous;
   else persona.selectedIndex=Math.max(0,voices.findIndex(v=>/^en-GB$/i.test(v.lang)));
-  if(!hasRecording)say(voices.length+' voix anglaise'+(voices.length>1?'s':'')+' détectée'+(voices.length>1?'s':'')+'. Choisis une voix et appuie sur Écouter.');
  };
  listVoices();
- if('speechSynthesis' in window){
-  const previous=speechSynthesis.onvoiceschanged;
-  speechSynthesis.onvoiceschanged=e=>{if(typeof previous==='function')previous.call(speechSynthesis,e);if(persona.isConnected)listVoices();};
- }
- (async()=>{
-  try{const res=await fetch(prerecorded,{method:'HEAD'});hasRecording=res.ok;}catch(_){hasRecording=false;}
-  if(!persona.isConnected)return;
-  if(hasRecording){
-   persona.disabled=true;
-   say('Un fichier MP3 est disponible : sa voix est fixe. Le sélecteur n’agit que sur la synthèse vocale, en l’absence de MP3.');
-  }else{listVoices();}
- })();
+ if('speechSynthesis' in window) speechSynthesis.addEventListener('voiceschanged',()=>{if(persona.isConnected&&!loadedMP3)listVoices();},{once:true});
+ v7Audio.onended=()=>say('Enregistrement terminé. Clique sur Recommencer pour réécouter.');
+ const fallback=()=>{
+  // The uploaded q0 recording should NOT silently switch to the browser voice.
+  if(index===0){say('⚠ Impossible de lire q0.mp3. Vérifie le lien du fichier audio et recharge la page.');return;}
+  loadedMP3=false;persona.disabled=false;listVoices();
+  const ok=v7Speak(q.t,{rate:speed.value,persona:persona.value});
+  say(ok?'Aucun MP3 pour cette question : lecture avec la voix du navigateur.':'Aucun audio disponible.');
+ };
  const begin=async(restartFromStart=false)=>{
-  const myToken=++token;
-  if(hasRecording){
-   if(restartFromStart || v7Audio.src!==new URL(prerecorded,location.href).href){v7Stop();v7Audio.src=prerecorded;}
-   v7Audio.playbackRate=Number(speed.value)||1;
-   try{await v7Audio.play();if(myToken!==token){v7Audio.pause();return;}v7PlayingMode='file';isPaused=false;say('Lecture MP3 en cours (voix fixe).');return;}
-   catch(_){hasRecording=false;persona.disabled=false;listVoices();}
+  if(!restartFromStart&&isPaused&&v7PlayingMode==='file'){
+   try{await v7Audio.play();isPaused=false;say('Lecture du MP3 reprise.');return;}catch(_){}
   }
-  if(!restartFromStart&&isPaused&&v7PlayingMode==='speech'&&'speechSynthesis' in window){speechSynthesis.resume();isPaused=false;say('Lecture reprise.');return;}
-  const selected=persona.value;
-  isPaused=false;
-  const ok=v7Speak(q.t,{rate:speed.value,persona:selected});
-  say(ok?'Lecture par la voix sélectionnée dans ton navigateur.':'Synthèse vocale indisponible sur cet appareil.');
+  if(!restartFromStart&&isPaused&&v7PlayingMode==='speech'&&'speechSynthesis' in window){
+   speechSynthesis.resume();isPaused=false;say('Lecture reprise.');return;
+  }
+  v7Stop();isPaused=false;
+  v7Audio.src=prerecorded;
+  v7Audio.playbackRate=Number(speed.value)||1;
+  try{
+    await v7Audio.play();
+    loadedMP3=true;persona.disabled=true;v7PlayingMode='file';
+    say('🎙 Enregistrement MP3 ElevenLabs en cours (pas la voix Firefox).');
+  }catch(err){fallback();}
  };
  play.onclick=()=>begin(false);
  pause.onclick=()=>{
-  if(v7PlayingMode==='file'){v7Audio.pause();isPaused=true;say('Lecture en pause.');}
+  if(v7PlayingMode==='file'){v7Audio.pause();isPaused=true;say('MP3 en pause.');}
   else if(v7PlayingMode==='speech'&&'speechSynthesis' in window){speechSynthesis.pause();isPaused=true;say('Lecture en pause.');}
  };
  restart.onclick=()=>begin(true);
  speed.onchange=()=>{if(v7PlayingMode==='file')v7Audio.playbackRate=Number(speed.value);};
- persona.onchange=()=>{if(v7PlayingMode==='speech')v7Stop();say('Voix sélectionnée : '+persona.options[persona.selectedIndex]?.text+'. Appuie sur Écouter.');};
+ persona.onchange=()=>{if(v7PlayingMode==='speech')v7Stop();say('Voix du navigateur sélectionnée.');};
+ say(index===0?'🎙 MP3 ElevenLabs q0.mp3 : clique sur Écouter.':'Recherche du MP3 à la lecture ; voix Firefox uniquement en secours.');
 }
