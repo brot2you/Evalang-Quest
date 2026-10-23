@@ -4,6 +4,10 @@ if(Array.isArray(window.EVALANG_EXTRA_ITEMS)){
  const all=window.EVALANG_EXTRA_ITEMS.filter(q=>q&&TYPES[q.d]&&q.o?.length===4&&q.a>=0&&q.a<4&&q.l>=0&&q.l<=5);
  bank.push(...all);
 }
+for(const variable of ['EVALANG_EXTRA_V9_PART1','EVALANG_EXTRA_V9_PART2','EVALANG_EXTRA_V9_PART3']){
+ const more=window[variable];
+ if(Array.isArray(more))bank.push(...more.filter(q=>q&&TYPES[q.d]&&q.o?.length===4&&Number.isInteger(q.a)&&q.a>=0&&q.a<4&&q.l>=0&&q.l<=5));
+}
 const v8OriginalAnswer=answer;
 const v8LastKey='evalang_quest_question_history_v8';
 let v8Recent=[];
@@ -47,9 +51,12 @@ pick=function(){
  const domains=Object.keys(TYPES);
  const d=session.mode==='mixed'?domains[session.step%domains.length]:session.mode;
  const target=session.targets[d];
+ const usedTexts=new Set(session.seen.map(i=>bank[i]?.t));
  const available=bank.map((q,i)=>({q,i})).filter(x=>x.q.d===d&&!session.seen.includes(x.i));
- let pool=available.filter(x=>!v8Recent.includes(x.i));
- if(!pool.length)pool=available;
+ const freshPassages=available.filter(x=>!usedTexts.has(x.q.t));
+ const eligible=freshPassages.length?freshPassages:available;
+ let pool=eligible.filter(x=>!v8Recent.includes(x.i));
+ if(!pool.length)pool=eligible;
  if(!pool.length)pool=bank.map((q,i)=>({q,i})).filter(x=>x.q.d===d);
  if(!pool.length)throw new Error('No question available for '+d);
  let best=Infinity;
