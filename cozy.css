@@ -9,3 +9,33 @@
 .brand-tagline{display:block;flex-basis:100%;margin-left:51px;margin-top:-6px;font-size:.69rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:#688276}
 .top{padding:19px 0 23px}.map-intro .eyebrow{letter-spacing:.12em}
 @media(max-width:680px){.brand-word{font-size:1.65rem}.brand-tagline{margin-left:51px}.top{gap:15px}}
+
+/* V3 — Evalang-inspired coral identity, distinct from the earlier green fantasy theme. */
+:root{--ink:#522734;--sage:#d53d50;--gold:#ffab5a;--paper:#fff9f6;--line:#f4bec4}
+body{color:#512734!important;background:#fff1f0!important;background-image:radial-gradient(ellipse at 0 0,#ffd6d6,transparent 48%),radial-gradient(ellipse at 100% 50%,#fff0cf,transparent 45%)!important}
+.top{background:#fffaf8f5!important;border-color:#f2b7b9!important;box-shadow:0 6px 20px #c7485425!important}
+.brand-spark{background:linear-gradient(150deg,#ff5868,#ee344d)!important;color:white!important;border-color:#ffe3dd!important;box-shadow:0 4px 0 #aa3545!important}
+.brand-word,.brand-word em,.brand-at{color:#dd364b!important;text-shadow:none!important}
+.brand-tagline{color:#a74755!important}
+.worldmap{border-color:#fff5f1!important;box-shadow:0 9px 0 #e9a7a5,0 25px 55px #913c4840!important;background-color:#ffd7d5!important}
+.map-intro{background:#fff9f6f2!important;border-color:#f8c0ba!important;box-shadow:0 7px 0 #e6aaaa,0 14px 26px #95465125!important}
+.map-intro h1{color:#b62f46!important}
+.map-intro p,.map-marker small{color:#995160!important}
+.map-marker{background:#fff7f6f2!important;border-color:#fff!important;color:#a42c43!important;box-shadow:0 6px 0 #d98e96,0 12px 18px #883f492d!important}
+.map-marker[data-place=journal]{background:#ffe2bd!important}
+.worldcard{border-color:#fff7f3!important;box-shadow:0 7px 0 #e4b3a6,0 15px 24px #8d43532b!important}
+.scene-title{border-color:#ffe6d8!important;box-shadow:0 7px 0 #e8b7ab!important}
+.scene-title:before{background:linear-gradient(90deg,#fff9f5f7,#fff9f5dd 52%,transparent)!important}
+.journal-book{border-color:#c65c62!important;outline-color:#ffd9cc!important}
+.quest-card,.panel,.card{border-color:#f2d1ce!important}
+.explanation,.notice{background:#fff0dc!important;border-color:#f6b968!important}
+.btn.primary,.primary{background:linear-gradient(140deg,#ff6770,#da304b)!important;color:#fff!important;border-color:#b9344a!important}
+.pill,.chip{background:#ffe6e3!important;color:#922a3c!important}
+.reward-hero{background:linear-gradient(125deg,#de3c53,#ff8269);color:white;padding:30px;border-radius:24px;margin:14px 0 22px;position:relative;overflow:hidden}
+.reward-hero h1,.reward-hero p{color:white!important}.reward-hero .pill{background:#fff9f5;color:#a52c45}
+.reward-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.reward-tabs button{padding:12px 19px;border:2px solid #f4afb3;border-radius:14px;background:#fff9f8;color:#86283c;font:inherit;font-weight:900;cursor:pointer}.reward-tabs button.active{background:#c9334e;color:white}
+.reward-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.reward-card{display:flex;min-height:196px;flex-direction:column;justify-content:space-between;gap:8px;padding:17px;border:2px solid #efc4c1;border-radius:19px;background:#fffaf7;box-shadow:0 5px 0 #e6b6b3;text-align:center}
+.reward-card.unlocked{background:linear-gradient(150deg,#fff8ee,#ffe8ed);border-color:#f09c92}
+.reward-symbol{font-size:2.5rem;line-height:1.4}.reward-card h3{font-size:1.04rem;margin:0;color:#862b42}.reward-card p{font-size:.8rem;margin:0;color:#825661}.reward-card .btn{padding:8px}.reward-progress{height:9px;border-radius:10px;background:#f5d8d5;overflow:hidden}.reward-progress i{display:block;height:100%;background:#db3d58;border-radius:10px}
+@media(max-width:650px){.reward-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.reward-card{padding:10px;min-height:190px}.reward-hero{padding:19px}}

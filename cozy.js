@@ -29,3 +29,33 @@ openLesson=function(id,immediate=false){const q=bank[Number(id)];if(!q){nav('jou
 const oldPassport=passport;
 passport=function(){oldPassport();const box=document.querySelector('.panel');if(box){const note=document.createElement('div');note.className='notice';note.innerHTML='<strong>Important:</strong> The CEFR labels shown here are informal practice indicators, not validated placement results. A reliable placement needs a much larger calibrated item bank and independent assessments. Listening is synthesized speech in this prototype.';box.appendChild(note)}};
 render();
+
+
+/* V3 Reward studio — additive, saved locally and decoupled from CEFR. */
+const BADGE_DEFS=[
+['first','First spark','✦',s=>s.answers,1],['tries10','10 challenges','⚡',s=>s.answers,10],['tries25','25 challenges','🚀',s=>s.answers,25],['tries50','50 challenges','🎯',s=>s.answers,50],['tries100','100 challenges','🏆',s=>s.answers,100],
+['correct5','Sharp eye','🔍',s=>s.correct,5],['correct20','Bright thinker','💡',s=>s.correct,20],['correct50','Brainwave','🧠',s=>s.correct,50],
+['listen5','Sound scout','🎧',s=>s.skills.listening.attempts,5],['listen15','Sound expert','🎼',s=>s.skills.listening.attempts,15],
+['read5','Page turner','📖',s=>s.skills.reading.attempts,5],['read15','Story detective','🕵️',s=>s.skills.reading.attempts,15],
+['grammar5','Pattern finder','🧩',s=>s.skills.grammar.attempts,5],['grammar15','Grammar wizard','✨',s=>s.skills.grammar.attempts,15],
+['vocab5','Word hunter','💬',s=>s.skills.vocabulary.attempts,5],['vocab15','Word collector','💎',s=>s.skills.vocabulary.attempts,15],
+['all4','Four directions','🧭',s=>Object.values(s.skills).filter(x=>x.attempts>=3).length,4],
+['fix1','Learning courage','🌱',s=>Object.values(s.journal||{}).filter(x=>x.errors>0).length,1],
+['fix3','Reflection expert','📝',s=>Object.values(s.journal||{}).filter(x=>x.errors>0).length,3],
+['master1','Memory keeper','🗝️',s=>Object.values(s.journal||{}).filter(x=>x.mastered).length,1],
+['master3','Memory garden','🌸',s=>Object.values(s.journal||{}).filter(x=>x.mastered).length,3],
+['xp500','Rising star','🌟',s=>s.xp,500],['xp1500','Supernova','☄️',s=>s.xp,1500],['coins200','Treasure trail','🪙',s=>s.coins+(s.rewardSpent||0),200]
+];
+const REWARD_SHOP=[['rose','Coral Explorer','🌺',35,'avatar'],['wave','Listening Hero','🎧',55,'avatar'],['fox','Clever Fox','🦊',75,'avatar'],['comet','Comet Rider','☄️',95,'avatar'],['berry','Berry Passport','🍓',40,'frame'],['sun','Sunset Passport','🌇',65,'frame'],['glow','Aurora Passport','🌌',100,'frame'],['star','Star Passport','⭐',130,'frame']];
+state.rewardItems=state.rewardItems||[];state.rewardEquipped=state.rewardEquipped||{};state.rewardSpent=state.rewardSpent||0;
+let rewardTab='badges';
+function unlockCount(){return BADGE_DEFS.filter(([, , ,fn,target])=>fn(state)>=target).length}
+rewards=function(){let body='';if(rewardTab==='badges')body=`<div class="reward-grid">${BADGE_DEFS.map(([id,name,symbol,fn,target])=>{const val=fn(state),ok=val>=target;return `<article class="reward-card ${ok?'unlocked':''}"><div class="reward-symbol">${symbol}</div><h3>${name}</h3><p>${ok?'Unlocked!':`${Math.min(val,target)} / ${target}`}</p><div class="reward-progress"><i style="width:${Math.min(100,100*val/target)}%"></i></div><span class="pill">${ok?'✓ Collected':'Keep exploring'}</span></article>`}).join('')}</div>`;
+else if(rewardTab==='shop')body=`<p>Spend your quest coins on collectibles. All rewards are cosmetic; English levels are never for sale.</p><div class="reward-grid">${REWARD_SHOP.map(([id,name,symbol,cost,type])=>{const owned=state.rewardItems.includes(id),equipped=state.rewardEquipped[type]===id;return `<article class="reward-card ${owned?'unlocked':''}"><div class="reward-symbol">${symbol}</div><h3>${name}</h3><p>${type==='frame'?'Passport frame':'Explorer avatar'}</p><button class="btn ${equipped?'primary':''}" data-buy="${id}">${equipped?'✓ Equipped':owned?'Equip':`🪙 ${cost} · Unlock`}</button></article>`}).join('')}</div>`;
+else body=`<div class="panel"><h2>My Collection</h2><p>Choose your favorite collectibles in the Reward Shop.</p><div class="reward-grid">${REWARD_SHOP.filter(([id])=>state.rewardItems.includes(id)).map(([id,name,symbol,cost,type])=>`<article class="reward-card unlocked"><div class="reward-symbol">${symbol}</div><h3>${name}</h3><p>${state.rewardEquipped[type]===id?'✓ Equipped':'Collected'}</p></article>`).join('')||'<p>No collectibles unlocked yet. Visit the Reward Shop to begin!</p>'}</div></div>`;
+mount(`<div class="reward-hero"><div class="eyebrow">EV@LANG QUEST · REWARD STUDIO</div><h1>Collect your victories</h1><p>Every attempt counts. Explore badges, earn coins and personalise your adventure.</p><div class="quest-stage"><span class="pill">🏅 ${unlockCount()} / ${BADGE_DEFS.length} badges</span><span class="pill">🪙 ${state.coins} coins</span><span class="pill">⭐ ${state.xp} XP</span></div></div><div class="reward-tabs" role="group" aria-label="Rewards sections"><button data-tab="badges" class="${rewardTab==='badges'?'active':''}">Badges</button><button data-tab="shop" class="${rewardTab==='shop'?'active':''}">Reward Shop</button><button data-tab="collection" class="${rewardTab==='collection'?'active':''}">Collection</button></div>${body}<p class="small">Rewards celebrate participation and practice; they do not certify a CEFR level. Progress is saved on this device.</p>`);
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{rewardTab=b.dataset.tab;rewards()});document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{const item=REWARD_SHOP.find(x=>x[0]===b.dataset.buy);if(!item)return;const [id,,,cost,type]=item;if(!state.rewardItems.includes(id)){if(state.coins<cost){alert('Keep practising to earn more quest coins!');return}state.coins-=cost;state.rewardSpent+=cost;state.rewardItems.push(id)}state.rewardEquipped[type]=id;save();rewards()})};
+// Enhance the existing village without replacing its navigation or learning functionality.
+const rewardHome=home;
+home=function(){rewardHome();const map=document.querySelector('.worldmap');if(map){const b=document.createElement('button');b.className='map-marker';b.style.cssText='left:15%;top:31%;animation-delay:-1.2s';b.innerHTML='<span class="map-icon">🏅</span><strong>Reward Studio</strong><small>'+unlockCount()+' / '+BADGE_DEFS.length+' badges</small>';b.setAttribute('aria-label','Open Reward Studio');b.onclick=()=>nav('rewards');map.appendChild(b)}};
+render();
