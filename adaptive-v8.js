@@ -57,7 +57,7 @@ pick=function(){
  const close=pool.filter(x=>Math.abs(x.q.l-target)===best);
  // Shuffle correct answer position to avoid option-order memorization.
  const chosen=close[Math.floor(Math.random()*close.length)],q=chosen.q;
- const newQ={...q,o:[...q.o],sourceIndex:chosen.i};
+ const newQ=q;
  const answerText=newQ.o[newQ.a];
  for(let i=newQ.o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[newQ.o[i],newQ.o[j]]=[newQ.o[j],newQ.o[i]];}
  newQ.a=newQ.o.indexOf(answerText);
@@ -74,10 +74,7 @@ answer=function(chosen){
  if(!q)return;
  const d=q.d,ok=chosen===q.a,target=session.targets[d],streak=session.streaks[d]||0;
  // Original response handler awards XP, stores history and opens learning journal.
- // Put correct cloned item at its source slot temporarily for journal compatibility.
- let original;
- if(Number.isInteger(q.sourceIndex)){original=bank[q.sourceIndex];bank[q.sourceIndex]=q;}
- try{v8OriginalAnswer(chosen);}finally{if(original)bank[q.sourceIndex]=original;}
+ v8OriginalAnswer(chosen);
  if(!session)return;
  session.streaks[d]=ok?streak+1:0;
  if(ok&&session.streaks[d]>=2){
