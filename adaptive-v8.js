@@ -96,7 +96,7 @@ function v8Panel(){
  ds.map(d=>{const s=v8DomainReport(d);return '<div class="card" style="min-height:154px"><strong>'+TYPES[d].title+'</strong><h2 style="margin:12px 0">'+s.text+'</h2><span class="small">'+s.count+' réponses · '+s.certainty+'</span></div>';}).join('')+'</div>'+
  '<h3 style="margin-top:20px">Attendus de fin de 3e</h3><p><strong>Anglais LVA : B1</strong> · <strong>Anglais LVB : A2</strong>, objectifs de référence du programme. Le test Ev@lang se concentre sur la réception et les connaissances linguistiques.</p>'+
  '<p><strong>Synthèse :</strong> '+(overall===null?'Diagnostic encore incomplet : travaille chacun des quatre domaines au moins huit fois.':'Repère transversal actuel : '+LEVELS[overall]+'. Ce repère ne vaut pas une certification.')+'</p>'+
- '<p class="small">Les niveaux sont déduits des réussites et difficultés sur des questions originales non étalonnées. L'adaptation est un mécanisme d'entraînement ; seule une évaluation calibrée et validée permettrait une estimation de niveau fiable.</p></div>';
+ '<p class="small">Les niveaux sont déduits des réussites et difficultés sur des questions originales non étalonnées. L’adaptation est un mécanisme d’entraînement ; seule une évaluation calibrée et validée permettrait une estimation de niveau fiable.</p></div>';
 }
 const v8OriginalPassport=passport;
 passport=function(){v8OriginalPassport();document.getElementById('app').insertAdjacentHTML('beforeend',v8Panel());};
